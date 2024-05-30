@@ -1,0 +1,128 @@
+# For this project, I downloaded Spotify data from Kaggle.
+# Then I created a table to insert Spotify data into.
+# Finally, I performed analytics on the data using SQL. 
+
+#Creating the table: 
+CREATE TABLE BIT_DB.Spotifydata (
+id integer PRIMARY KEY,
+artist_name varchar NOT NULL,
+track_name varchar NOT NULL,
+track_id varchar NOT NULL,
+popularity integer NOT NULL,
+danceability decimal(4,3) NOT NULL,
+energy decimal(4,3) NOT NULL,
+key integer NOT NULL,
+loudness decimal(5,3) NOT NULL,
+mode integer NOT NULL,
+speechiness decimal(5,4) NOT NULL,
+acousticness decimal(6,5) NOT NULL,
+instrumentalness text NOT NULL,
+liveness decimal(5,4) NOT NULL,
+valence decimal(4,3) NOT NULL,
+tempo decimal(6,3) NOT NULL,
+duration_ms integer NOT NULL,
+time_signature integer NOT NULL 
+)
+
+#Then I inserted the Spotify Data .csv into the table.
+
+#Next, I explored the data using the following SQL. 
+
+
+
+SELECT * FROM BIT_DB.Spotifydata;
+
+-- What artist had the highest avg popularity score?
+
+SELECT artist_name, AVG(popularity) AS avg_popularity
+FROM BIT_DB.Spotifydata
+GROUP BY artist_name
+ORDER BY avg_popularity DESC
+LIMIT 1;
+
+
+-- Top 10 most played songs
+
+SELECT artist_name, track_name, popularity
+FROM BIT_DB.spotifydata
+ORDER BY popularity desc
+limit 10;
+
+
+-- How many of the top 50 songs were by Doja Cat?
+
+SELECT artist_name, count(track_name) AS num_songs
+FROM BIT_DB.spotifydata
+WHERE artist_name='Doja Cat'
+GROUP BY artist_name;
+
+
+
+-- Rate how popular each artist is.
+
+SELECT artist_name, 
+ROUND(AVG(popularity)) AS avg_popularity,
+CASE WHEN avg(popularity)>=90 THEN 'Highly Popular'
+WHEN avg(popularity)>=80 THEN 'Popular'
+ELSE 'Least Popular'
+END AS Popular
+FROM BIT_DB.spotifydata
+GROUP BY artist_name
+ORDER BY avg_popularity desc
+;
+
+
+
+-- Top 5 longest high energy songs
+
+SELECT track_name, duration_ms AS "Longest High Energy Songs"
+FROM BIT_DB.spotifydata
+WHERE tempo>=100
+AND duration_ms>=200000
+Limit 5;
+
+
+-- Identify the track with the highest danceability score.
+
+SELECT track_name, artist_name, danceability
+FROM BIT_DB.Spotifydata
+ORDER BY danceability DESC
+LIMIT 1;
+
+-- Find the top 5 most energetic tracks according to the energy score.
+
+SELECT track_name, artist_name, energy
+FROM BIT_DB.Spotifydata
+ORDER BY energy DESC
+LIMIT 5;
+
+-- List the artists and the number of tracks they have that do not appear in the top 10 most popular tracks.
+
+SELECT artist_name, COUNT(track_name) AS track_count
+FROM BIT_DB.Spotifydata
+WHERE track_name NOT IN (
+    SELECT track_name
+    FROM BIT_DB.Spotifydata
+    ORDER BY popularity DESC
+    LIMIT 10
+)
+GROUP BY artist_name;
+
+--Which tracks have a danceability score greater than 0.7 and belong to artists who have more than one track in the dataset?
+
+SELECT track_name, artist_name, danceability
+FROM BIT_DB.Spotifydata
+WHERE danceability > 0.7 AND artist_name
+IN (SELECT artist_name
+FROM BIT_DB.spotifydata
+GROUP BY artist_name
+HAVING COUNT(track_name) >1);
+
+
+-- Which artist has the most tracks in the dataset, and what is their total popularity score?
+
+SELECT artist_name, COUNT(track_name) AS track_count, SUM(popularity) AS total_popularity
+FROM BIT_DB.Spotifydata
+GROUP BY artist_name
+ORDER BY track_count DESC, total_popularity DESC
+LIMIT 1;
