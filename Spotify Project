@@ -126,3 +126,18 @@ FROM BIT_DB.Spotifydata
 GROUP BY artist_name
 ORDER BY track_count DESC, total_popularity DESC
 LIMIT 1;
+
+
+-- Top Star based on average popularity of 90 or above.
+
+WITH popularity_average_CTE AS (
+SELECT AVG(s.popularity) AS average_popularity, s.artist_name
+FROM spotifydata s
+GROUP BY artist_name
+)
+
+SELECT artist_name, 
+average_popularity
+, 'Top Star' AS tag
+FROM popularity_average_CTE
+WHERE average_popularity>=90;
